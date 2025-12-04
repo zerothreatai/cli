@@ -1,0 +1,2 @@
+# cli
+ZeroThreat License Activation 
