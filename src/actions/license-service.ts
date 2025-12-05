@@ -78,7 +78,7 @@ async function runCompose(args: string[]): Promise<void> {
 }
 
 export async function firstIgnition(licenseKey: string, emailId: string): Promise<string> {
-    console.log(">> Running first docker setup ...");
+    
     let token = '';
     const acrTokenService = new AcrTokenService();
     const machineId =  getMachineId()
@@ -89,6 +89,7 @@ export async function firstIgnition(licenseKey: string, emailId: string): Promis
         if (dockerComposeAcr) {
             COMPOSE_FILE = dockerComposeAcr;
         }
+        console.log(">> Setting up application ...");
         await ensureNetwork();
         await pullImages();
         await runCompose(["up", "-d"]);
