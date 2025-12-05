@@ -50,7 +50,7 @@ export interface actiavteLicenseRes {
 class LicenseApiService extends ApiService {
     constructor() {
         super({
-            baseURL: API_CONFIG.licenseApi,
+            baseURL: API_CONFIG().licenseApi,
             timeout: 15000,
         });
     }
@@ -83,7 +83,7 @@ class LicenseApiService extends ApiService {
                     } catch (error: any) {
                         if (error.code === 'ECONNREFUSED') {
                             const fallbackService = new ApiService({
-                                baseURL: API_CONFIG.onPremLicenseCloudeApi,
+                                baseURL: API_CONFIG().onPremLicenseCloudeApi,
                                 timeout: 15000,
                             });
                             const res = await fallbackService.post<LicenseDeactivateResponse>('/deassociate', {

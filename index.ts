@@ -2,6 +2,11 @@
 import { program } from 'commander';
 import showMenu from './src/menu.js';
 import {startSetup} from './src/commands/start-setup.js';
+import { config } from 'dotenv'
+
+config({
+  path: !process.env.WORKING_ENVIRONMENT ? `.env.prod`:`.env`
+});
 
 program
   .name("zt")

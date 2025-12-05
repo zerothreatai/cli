@@ -23,7 +23,7 @@ export interface DockerAuth {
 export default class AcrTokenService extends ApiService {
     constructor() {
                 super({
-                    baseURL: API_CONFIG.onPremLicenseCloudeApi,
+                    baseURL: API_CONFIG().onPremLicenseCloudeApi,
                     timeout: 15000,
                 });
             }
