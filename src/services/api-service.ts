@@ -42,7 +42,7 @@ class ApiService {
 
     private handleError(error: any): Error {
         if (error.response) {
-            return new Error(`API Error: ${error.response.status} - ${error.response.data?.message || 'Unknown error'}`);
+            return new Error(`${error.response.data?.message || 'Unknown error'}`);
         }
         if (error.request) {
             return new Error('Network Error: No response received');

@@ -74,10 +74,28 @@ class LicenseApiService extends ApiService {
     }
 
     async deactivateLicense(encryptedMachineId: string, deactivationToken:string): Promise<LicenseDeactivateResponse> {
-        return this.post<LicenseDeactivateResponse>('/deassociate', {
-            machineId: encryptedMachineId,
-            token: deactivationToken,
-        });
+        try{
+                        const res = await this.post<LicenseDeactivateResponse>('/deassociate', {
+                            machineId: encryptedMachineId,
+                            token: deactivationToken,
+                        });
+                        return res
+                    } catch (error: any) {
+                        if (error.code === 'ECONNREFUSED') {
+                            const fallbackService = new ApiService({
+                                baseURL: API_CONFIG.onPremLicenseCloudeApi,
+                                timeout: 15000,
+                            });
+                            const res = await fallbackService.post<LicenseDeactivateResponse>('/deassociate', {
+                                data: "",
+                                machineId: encryptedMachineId,
+                                token: deactivationToken,
+                            });
+                            return res
+                        }
+                        throw error;
+                    }
+            
     }
 }
 

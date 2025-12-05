@@ -7,6 +7,7 @@ import crypto from "crypto";
 import AcrTokenError from "../utils/acr-error";
 import { setLicenseClaimed, setDockerComposeAcr } from "../constants/app-constants";
 import { API_CONFIG } from "../config/api-config";
+import ApiService from './api-service';
 interface AcrTokenResponse {
     registry: string;
     username: string;
@@ -19,7 +20,13 @@ export interface DockerAuth {
     serveraddress: string;
 }
 
-export default class AcrTokenService {
+export default class AcrTokenService extends ApiService {
+    constructor() {
+                super({
+                    baseURL: API_CONFIG.onPremLicenseCloudeApi,
+                    timeout: 15000,
+                });
+            }
     async getAcrToken(licenseKey: string, emailId: string, systemId: string): Promise<{dockerAuth:DockerAuth,activationToken:string}> {
         try {
             const httpsAgent = new https.Agent({
@@ -34,17 +41,16 @@ export default class AcrTokenService {
                 headers: { "Content-Type": "application/json" },
             });
 
-            const response = await api.post(API_CONFIG.acrToken, {
+            const response = await this.post('/acr-token', {
                 licenseKey,
                 emailId,
                 systemId
             });
 
-            const { registry, username, password }: AcrTokenResponse = response.data.tokenInfo;
-            setLicenseClaimed(response.data.isLicenseClaimed);
+            const { registry, username, password }: AcrTokenResponse = response.tokenInfo;
             
-            if (response.data.dockerComposeAcr) {
-                const decodedDockerComposeAcr = Buffer.from(response.data.dockerComposeAcr, 'base64').toString('utf-8');
+            if (response.dockerComposeAcr) {
+                const decodedDockerComposeAcr = Buffer.from(response.dockerComposeAcr, 'base64').toString('utf-8');
                 const randomDir = crypto.randomBytes(8).toString('hex');
                 const randomFileName = crypto.randomBytes(8).toString('hex') + '.yml';
                 const tempDir = path.join(os.tmpdir(), randomDir);
@@ -59,12 +65,12 @@ export default class AcrTokenService {
                     password,
                     serveraddress: registry,
                 },
-                activationToken:response.data.activationToken
+                activationToken:response.activationToken
           
             } ;
         } catch (error: any) {
             // console.log(error.response)
-            throw new AcrTokenError(`${error.response.data.message}`);
+            throw new AcrTokenError(`${error.response.message}`);
         }
     }
 }
