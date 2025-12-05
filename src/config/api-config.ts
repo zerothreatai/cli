@@ -1,11 +1,18 @@
 export interface ApiEndpoints {
-    licenseApi: string;
-    onPremLicenseCloudeApi: string;
+  licenseApi: string;
+  onPremLicenseCloudeApi: string;
 }
 
-export const API_CONFIG = ():ApiEndpoints=>{return {
-    licenseApi: process.env.LICENSE_API as string,
-    onPremLicenseCloudeApi: process.env.CLOUD_API as string,
-}
-    
+export const API_CONFIG = (): ApiEndpoints => {
+  if (!process.env.WORKING_ENVIRONMENT) {
+    return {
+      licenseApi: `http://localhost:3201/api/license`,
+      onPremLicenseCloudeApi: `https://api.zerothreat.ai/api/on-prem/license`,
+    };
+  } else {
+    return {
+      licenseApi: process.env.LICENSE_API as string,
+      onPremLicenseCloudeApi: process.env.CLOUD_API as string,
+    };
+  }
 };
