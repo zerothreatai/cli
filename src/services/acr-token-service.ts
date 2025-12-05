@@ -69,8 +69,7 @@ export default class AcrTokenService extends ApiService {
           
             } ;
         } catch (error: any) {
-            // console.log(error.response)
-            throw new AcrTokenError(`${error.response.message}`);
+            throw new AcrTokenError(`${error.message}`);
         }
     }
 }
