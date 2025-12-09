@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import https from 'https';
+import NetworkError from '../utils/network-error';
 
 interface ApiConfig {
     baseURL: string;
@@ -45,7 +46,7 @@ class ApiService {
             return new Error(`${error.response.data?.message || 'Unknown error'}`);
         }
         if (error.request) {
-            return new Error('Network Error: No response received');
+            return new NetworkError('Network Error: No response received')
         }
         return new Error(`Request Error: ${error.message}`);
     }

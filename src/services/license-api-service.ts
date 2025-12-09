@@ -1,5 +1,6 @@
 import ApiService from './api-service';
 import { API_CONFIG } from '../config/api-config';
+import NetworkError from '../utils/network-error';
 
 interface LicenseSetupResponse {
     success: boolean;
@@ -48,6 +49,7 @@ export interface actiavteLicenseRes {
     organizationName: string
 }
 class LicenseApiService extends ApiService {
+    
     constructor() {
         super({
             baseURL: API_CONFIG().licenseApi,
@@ -81,7 +83,7 @@ class LicenseApiService extends ApiService {
                         });
                         return res
                     } catch (error: any) {
-                        if (error.code === 'ECONNREFUSED') {
+                        if (error.code === 'ECONNREFUSED' || error instanceof NetworkError) {
                             const fallbackService = new ApiService({
                                 baseURL: API_CONFIG().onPremLicenseCloudeApi,
                                 timeout: 15000,

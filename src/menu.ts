@@ -2,6 +2,7 @@ import inquirer from "inquirer";
 import chalk from "chalk";
 import {startSetup} from "./commands/start-setup";
 import deactivate from "./commands/deactivate";
+import { installDocker } from "./commands/install-docker";
 
 export default async function showMenu(): Promise<void> {
   console.clear();
@@ -34,6 +35,10 @@ export default async function showMenu(): Promise<void> {
       message: chalk.bold.cyan("Select an action:"),
       choices: [
         { 
+          name: chalk.green("⚙️  Install Prerequisite Software for Linux Environment"), 
+          value: "System Check" 
+        },
+        { 
           name: chalk.green("🔑 Activate License & Setup"), 
           value: "Start Setup" 
         },
@@ -64,6 +69,9 @@ export default async function showMenu(): Promise<void> {
       break;
     case "Deactivate License":
       await deactivate();
+      break;
+    case "System Check":
+      await installDocker();
       break;
     default:
       console.log("Exiting...");
