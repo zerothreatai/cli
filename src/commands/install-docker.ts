@@ -40,6 +40,7 @@ export async function installDocker(): Promise<void> {
             'sudo apt update',
             'sudo apt install docker-ce -y',
             'sudo usermod -aG docker ${USER}',
+            'su - ${USER}'
         ];
 
         for (const cmd of commands) {
