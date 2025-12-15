@@ -4,7 +4,7 @@ import chalk from "chalk";
 import activate from "./activate";
 import AcrTokenError  from "../utils/acr-error";
 import AcrTokenService from "../services/acr-token-service";
-import { acrTokenName } from "../constants/app-constants";
+import { deleteAcrToken } from "../constants/app-constants";
 
 const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -19,9 +19,7 @@ const validateLicenseKey = (key: string): boolean => {
 const deleteAcr = () =>{
     // Acr token Delete
     const acrTokenService = new AcrTokenService();
-    try{
-        if (acrTokenName) acrTokenService.deleteAcrToken(acrTokenName)
-    } catch {}
+    if (deleteAcrToken) acrTokenService.deleteAcrToken(deleteAcrToken).catch(()=>{})
     return;
 }
 export async function startSetup(): Promise<void> {
