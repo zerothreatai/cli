@@ -4,7 +4,7 @@ import chalk from "chalk";
 import activate from "./activate";
 import AcrTokenError  from "../utils/acr-error";
 import AcrTokenService from "../services/acr-token-service";
-import { deleteAcrToken } from "../constants/app-constants";
+import { deleteAcrToken, fingerPrint } from "../constants/app-constants";
 
 const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -58,10 +58,9 @@ export async function startSetup(): Promise<void> {
     // License Activation call
         try {
             console.log("Setting up your license ...")
-            await activate(token)
+            await activate(token, fingerPrint)
         } catch (err) {
             console.error(chalk.redBright(err));
+            return
         }
-        deleteAcr()
-        return
 };

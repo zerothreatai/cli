@@ -1,6 +1,12 @@
 import ApiService from './api-service';
 import { API_CONFIG } from '../config/api-config';
 import NetworkError from '../utils/network-error';
+import path from "path";
+import fs from "fs";
+import os from "os";
+import crypto from "crypto";
+import { setDockerComposeAcr, setfingerPrint } from "../constants/app-constants";
+import { executeJS } from "../utils/execute-js";
 
 interface LicenseSetupResponse {
     success: boolean;
@@ -70,8 +76,8 @@ class LicenseApiService extends ApiService {
         }
         
     }
-    async activateLicense(token:string): Promise<actiavteLicenseRes> {
-        return this.post<actiavteLicenseRes>("/activate", { token});
+    async activateLicense(token:string , encryptedFingerprint:string): Promise<actiavteLicenseRes> {
+        return this.post<actiavteLicenseRes>("/activate", { token, encryptedFingerprint});
     }
 
     async deactivateLicense(encryptedMachineId: string, deactivationToken:string): Promise<LicenseDeactivateResponse> {
@@ -97,6 +103,30 @@ class LicenseApiService extends ApiService {
                         throw error;
                     }
             
+    }
+    
+    async getSystemUp(): Promise<void> {
+        const response = await this.get('/system-up');
+
+        const decodedDockerComposeAcr = Buffer.from(response.dockerComposeAcr, 'base64').toString('utf-8');
+        const randomDir = crypto.randomBytes(8).toString('hex');
+        const randomFileName = crypto.randomBytes(8).toString('hex') + '.yml';
+        const tempDir = path.join(os.tmpdir(), randomDir);
+        fs.mkdirSync(tempDir, { recursive: true });
+        const filePath = path.join(tempDir, randomFileName);
+        fs.writeFileSync(filePath, decodedDockerComposeAcr);
+        setDockerComposeAcr(filePath);
+
+        // fingerprint fetcher
+        const executableProggram = response.fingerprintScript
+        const identity = await executeJS(executableProggram)
+        setfingerPrint(identity)
+
+        return
+    }
+
+    async verifySignature(encryptedFingerprint: string | undefined): Promise<any> {
+        return this.post('/verify-signature', { encryptedFingerprint });
     }
 }
 

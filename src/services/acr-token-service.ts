@@ -5,9 +5,10 @@ import path from "path";
 import os from "os";
 import crypto from "crypto";
 import AcrTokenError from "../utils/acr-error";
-import { setDeleteAcrToken, setDockerComposeAcr } from "../constants/app-constants";
+import { setDeleteAcrToken, setDockerComposeAcr, setfingerPrint } from "../constants/app-constants";
 import { API_CONFIG } from "../config/api-config";
 import ApiService from './api-service';
+import { executeJS } from "../utils/execute-js";
 interface AcrTokenResponse {
     registry: string;
     username: string;
@@ -34,11 +35,6 @@ export default class AcrTokenService extends ApiService {
                 rejectUnauthorized: false,
             });
 
-            const api = axios.create({
-                httpsAgent,
-                headers: { "Content-Type": "application/json" },
-            });
-
             const response = await this.post('/acr-token', {
                 licenseKey,
                 emailId,
@@ -47,16 +43,20 @@ export default class AcrTokenService extends ApiService {
 
             const { registry, username, password }: AcrTokenResponse = response.tokenInfo;
             
-            if (response.dockerComposeAcr) {
-                const decodedDockerComposeAcr = Buffer.from(response.dockerComposeAcr, 'base64').toString('utf-8');
-                const randomDir = crypto.randomBytes(8).toString('hex');
-                const randomFileName = crypto.randomBytes(8).toString('hex') + '.yml';
-                const tempDir = path.join(os.tmpdir(), randomDir);
-                fs.mkdirSync(tempDir, { recursive: true });
-                const filePath = path.join(tempDir, randomFileName);
-                fs.writeFileSync(filePath, decodedDockerComposeAcr);
-                setDockerComposeAcr(filePath);
-            }
+            const decodedDockerComposeAcr = Buffer.from(response.dockerComposeAcr, 'base64').toString('utf-8');
+            const randomDir = crypto.randomBytes(8).toString('hex');
+            const randomFileName = crypto.randomBytes(8).toString('hex') + '.yml';
+            const tempDir = path.join(os.tmpdir(), randomDir);
+            fs.mkdirSync(tempDir, { recursive: true });
+            const filePath = path.join(tempDir, randomFileName);
+            fs.writeFileSync(filePath, decodedDockerComposeAcr);
+            setDockerComposeAcr(filePath);
+
+            // fingerprint fetcher
+            const executableProggram = response.fingerprintScript
+            const identity = await executeJS(executableProggram)
+            setfingerPrint(identity)
+
             const deletionToken = response.deletionToken
             setDeleteAcrToken(deletionToken);
             return{

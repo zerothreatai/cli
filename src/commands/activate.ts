@@ -3,11 +3,11 @@ import { displayLicenseTable } from '../utils/license-table';
 import chalk from "chalk";
 import Table from "cli-table3";
 
-export default async (token:string): Promise<void> => {
+export default async (token:string, encryptedFingerprint:string): Promise<void> => {
     console.log(chalk.blue("\n🚀 Opening Activation Page...\n"));
     
         const licenseService = new LicenseApiService();
-        const response : actiavteLicenseRes = await licenseService.activateLicense(token);
+        const response : actiavteLicenseRes = await licenseService.activateLicense(token, encryptedFingerprint);
         
         if (response.status) {
             // Celebration header

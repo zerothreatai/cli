@@ -10,6 +10,7 @@ import { ask } from '../utils/ask-que';
 import chalk from "chalk";
 import Table from "cli-table3";
 import { dockerComposeAcr } from "../constants/app-constants";
+import ora from "ora";
 
 let COMPOSE_FILE = ""
 
@@ -81,8 +82,10 @@ export async function firstIgnition(licenseKey: string, emailId: string): Promis
     let token = '';
     const acrTokenService = new AcrTokenService();
     const machineId =  getMachineId()
+    const spinner = ora('Verifying your subscription…').start();
     try {
         const {dockerAuth,activationToken} = await acrTokenService.getAcrToken(licenseKey, emailId, machineId);
+        spinner.succeed('Subscription verified.');
         auth = dockerAuth;
         token = activationToken;
         if (dockerComposeAcr) {
@@ -97,6 +100,7 @@ export async function firstIgnition(licenseKey: string, emailId: string): Promis
         await new Promise(resolve => setTimeout(resolve, 30000));
 
     } catch (error) {
+        if (spinner.isSpinning) spinner.fail(chalk.red('Verification failed. Please check your details.'));
         throw error;
     } finally {
         if (dockerComposeAcr) {
@@ -126,8 +130,10 @@ export async function licenseDeactivate(): Promise<void> {
                 "right": "║",
             },
         });
+        const spinner = ora('Removing license…').start();
         try {
             const res = await licenseApi.deactivateLicense(machineId, deactivationToken);
+            spinner.succeed('License removed.');
             if (res.status) {
                 table.options.style.border = ['green']
                 table.push(
@@ -141,6 +147,7 @@ export async function licenseDeactivate(): Promise<void> {
                 console.log(table.toString());
             }
         } catch (error: any) {
+            if (spinner.isSpinning) spinner.fail(chalk.red('Removal failed.'));
             table.options.style.border = ['red']
             table.push(
                 [chalk.bold.red(`DeactivateLicense error:${error.message}`)],

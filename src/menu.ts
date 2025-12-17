@@ -3,6 +3,7 @@ import chalk from "chalk";
 import {startSetup} from "./commands/start-setup";
 import deactivate from "./commands/deactivate";
 import { installDocker } from "./commands/install-docker";
+import { restartService } from "./commands/restart-service";
 
 export default async function showMenu(): Promise<void> {
   console.clear();
@@ -19,7 +20,7 @@ export default async function showMenu(): Promise<void> {
   console.log(chalk.gray('║') + chalk.gray('  modern web apps & APIs through continuous pentesting, actionable            ') + chalk.gray('║'));
   console.log(chalk.gray('║') + chalk.gray('  insights, and coverage for 40,000+ vulnerabilities.                         ') + chalk.gray('║'));
   console.log(chalk.gray('║') + ' '.repeat(78) + chalk.gray('║'));
-  console.log(chalk.gray('║') +   chalk.bold.green('  🛡️  On-Premise Installation Tool                                         ') + chalk.gray('║'));
+  console.log(chalk.gray('║') +   chalk.bold.green('  🛡️  On-Premise Installation Tool                                             ') + chalk.gray('║'));
   console.log(chalk.gray('║') + ' '.repeat(78) + chalk.gray('║'));
   console.log(chalk.gray('╚' + '═'.repeat(78) + '╝'));
   console.log();
@@ -43,11 +44,15 @@ export default async function showMenu(): Promise<void> {
           value: "Start Setup" 
         },
         { 
+          name: chalk.cyan("🔄️ Start application if container shuts down"), 
+          value: "Restart" 
+        },
+        { 
           name: chalk.redBright("⛔ Deassociate License & System"), 
           value: "Deactivate License" 
         },
         {
-          name: chalk.yellow("🔄 Update License") + chalk.gray(" (Coming Soon)"),
+          name: chalk.yellow("⬆️  Update License") + chalk.gray(" (Coming Soon)"),
           value: "Update License (Coming Soon)",
         },
         { 
@@ -72,6 +77,9 @@ export default async function showMenu(): Promise<void> {
       break;
     case "System Check":
       await installDocker();
+      break;
+    case "Restart":
+      await restartService();
       break;
     default:
       console.log("Exiting...");
