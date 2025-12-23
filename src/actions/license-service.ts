@@ -77,6 +77,26 @@ async function runCompose(args: string[]): Promise<void> {
     });
 }
 
+async function checkSqlSuccess(): Promise<boolean> {
+    const containerName = 'a01-archive';
+    const timeout = 10 * 60 * 1000; // 10 minutes
+
+    const startTime = Date.now();
+    while (Date.now() - startTime < timeout) {
+        const containers = await docker.listContainers({ all: true, filters: { name: [containerName] } });
+        const container = containers.find(c => c.Names.some(n => n.includes(containerName)));
+
+        if (container && container.State === 'exited') {
+            const containerObj = docker.getContainer(container.Id);
+            const logs = await containerObj.logs({ stdout: true, stderr: true });
+            const logString = logs.toString();
+            return logString.includes('published successfully');
+        }
+        await new Promise(resolve => setTimeout(resolve, 3000));
+    }
+    return false;
+}
+
 export async function firstIgnition(licenseKey: string, emailId: string): Promise<string> {
     
     let token = '';
@@ -97,8 +117,11 @@ export async function firstIgnition(licenseKey: string, emailId: string): Promis
         await runCompose(["up", "-d"]);
         //sleep for 30 seconds to allow sql server to start
         console.log("Waiting for SQL Server to start...");
-        await new Promise(resolve => setTimeout(resolve, 30000));
-
+        const SqlSuccess = await checkSqlSuccess();
+        if (!SqlSuccess) {
+            throw new Error("Unable to complete database setup. Please try again later.");
+        }
+        
     } catch (error) {
         if (spinner.isSpinning) spinner.fail(chalk.red('Verification failed. Please check your details.'));
         throw error;

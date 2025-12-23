@@ -62,5 +62,5 @@ export function displayLicenseTable(response: actiavteLicenseRes): void {
     console.log(chalk.bold.blue('\n📊 LICENSE DETAILS'));
     console.log(table.toString());
     console.log(chalk.gray('➤ You can now start using ZeroThreat on this url : '));
-    console.log(chalk.bold.blue('http://localhost:5173'))
+    console.log(chalk.bold.blue('http://localhost:3203'))
 }

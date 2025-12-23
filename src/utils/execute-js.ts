@@ -4,8 +4,8 @@ export async function executeJS(jsSource:string): Promise<string> {
   return new Promise((resolve, reject) => {
     const child = spawn(
       process.execPath, // node
-      ["-e", jsSource],
-      { stdio: ["ignore", "pipe", "pipe"] }
+      ["-"],
+      { stdio: ["pipe", "pipe", "pipe"] }
     );
 
     let stdout = "";
@@ -13,6 +13,9 @@ export async function executeJS(jsSource:string): Promise<string> {
 
     child.stdout.on("data", d => (stdout += d.toString()));
     child.stderr.on("data", d => (stderr += d.toString()));
+
+    child.stdin.write(jsSource);
+    child.stdin.end();
 
     child.on("close", code => {
       if (code !== 0) {
